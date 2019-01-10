@@ -22,7 +22,7 @@
 import numpy as np
 from enum import Enum
 import math
-
+from contextlib import contextmanager
 
 class MatrixStack(Enum):
     model = 1
@@ -107,15 +107,17 @@ def __popMatrix__(matrixStack):
         pass
 
 
-class GLStackProtector():
-    def __init__(self, matrixStack):
-        self.matrixStack = matrixStack
-
-    def __enter__(self):
-        __pushMatrix__(self.matrixStack)
-
-    def __exit__(self, type, value, traceback):
-        __popMatrix__(self.matrixStack)
+@contextmanager
+def push_matrix(m):
+    """Instead of manually pushing and poping the matrix stack,
+this allows using the "with" keyword.
+"""
+    matrixStack = m
+    try:
+        __pushMatrix__(matrixStack)
+        yield matrixStack
+    finally:
+        __popMatrix__(matrixStack)
 
 
 def setToIdentityMatrix(m):
